@@ -42,8 +42,12 @@
 ;; We will test eval-under-env by calling it directly even though
 ;; "in real life" it would be a helper function of eval-exp.
 (define (eval-under-env e env)
-  (cond [(var? e) 
+  (cond
+       ;; interesting thing is
+         [(var? e) 
          (envlookup env (var-string e))]
+
+        
         [(plus? e) 
          (let ([v1 (eval-under-env (plus-e1 e) env)]
                [v2 (eval-under-env (plus-e2 e) env)])
