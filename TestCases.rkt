@@ -4,79 +4,13 @@
 
 ; This file uses Racket's unit-testing framework, which is convenient but not required of you.
 
-; Note we have provided [only] 3 tests, but you can't run them until do some of the assignment.
-; You will want more tests.
-
 (require rackunit)
+
 
 (define tests
   (test-suite
    "Project Tests"
 
-   (check-equal? (eval-exp (plus (num 2) (num 2))) (num 4) "plus simple test")
-   (check-equal? (eval-exp-c (with   "x"   (num 6)
-                 (apply (lam "g" "u"
-                 (plus (var "u") (num 10))) (var "x")))) (num 16))
-   (check-equal? (eval-exp   (with   "x"   (num 6)
-                 (apply (lam "g" "u" (plus (var "u") (num 10))) (var "x"))))
-                 (num 16))
-   
-             
-  (check-equal? (eval-exp (ifleq (num 1) (num 0) (num 3) (num 4)))
-                (num 4))
-   (check-equal? (eval-exp-c (ifleq (num 1) (num 0) (num 3) (num 4)))
-                (num 4))
-   (check-equal? (eval-exp (ifnzero (num 0) (num 3) (num 4))) (num 4))
-   (check-equal? (eval-exp-c (ifnzero (num 0) (num 3) (num 4))) (num 4))
-   (check-equal? (eval-exp (iseq (bool #t)(bool #f))) (bool #f) )
-   (check-equal? (eval-exp-c (iseq (bool #t)(bool #f))) (bool #f))
-   (check-equal? (eval-exp (iseq (num 1)(num 1))) (bool #t))
-   (check-equal? (eval-exp (cnd (bool #t) (num 1)(num 2))) (num 1))
-   (check-equal? (eval-exp-c (cnd (bool #t) (num 1)(num 2))) (num 1))
-   (check-equal? (eval-exp (orelse (bool #f)(bool #f))) (bool #f))
-   (check-equal? (eval-exp-c (orelse (bool #f)(bool #f))) (bool #f))
-   (check-equal? (eval-exp (andalso (bool #t)(bool #t))) (bool #t))
-    (check-equal? (eval-exp-c (andalso (bool #t)(bool #t))) (bool #t))
-   (check-equal? (eval-exp (neg (num 10))) (num -10))
-   (check-equal? (eval-exp-c (neg (num 10))) (num -10))
-   (check-equal?  (eval-exp (div (num 10)(num 2))) (num 5))
-   (check-equal?  (eval-exp-c (div (num 10)(num 2))) (num 5))
-   (check-equal? (eval-exp (mult (num 10)(num 4))) (num 40))
-   (check-equal? (eval-exp-c (mult (num 10)(num 4))) (num 40))
-   (check-equal? (eval-exp (minus (num 12)(num 14))) (num -2))
-   (check-equal? (eval-exp-c (minus (num 12)(num 14))) (num -2))
-   (check-equal? (eval-exp (plus (num 10)(num 20))) (num 30))
-   (check-equal? (eval-exp-c (plus (num 10)(num 20))) (num 30))
-   (check-equal? (eval-exp (bool #t)) (bool #t))
-   (check-equal? (eval-exp-c (bool #t)) (bool #t))
-   (check-equal? (eval-exp (num 10)) (num 10))
-   (check-equal? (eval-exp-c (num 10)) (num 10))
-   (check-equal? (eval-exp(munit)) (munit))
-   (check-equal? (eval-exp-c (munit)) (munit))
-   (check-equal? (eval-exp(ismunit(munit))) (bool #t))
-   (check-equal? (eval-exp-c(ismunit(munit))) (bool #t))
-   (check-equal? (eval-exp(2nd (apair (num 4) (num 3)))) (num 3))
-   (check-equal? (eval-exp-c(2nd (apair (num 4) (num 3)))) (num 3))
-   (check-equal? (eval-exp (1st(apair (num 2)(num 4)))) (num 2))
-   (check-equal? (eval-exp-c (1st(apair (num 2)(num 4)))) (num 2))
-   (check-equal? (eval-exp (apair (bool #t)(num 2))) (apair (bool #t) (num 2)))
-   (check-equal? (eval-exp-c (apair (bool #t)(num 2))) (apair (bool #t) (num 2)))
-   (check-equal? (eval-exp (ifleq (num 1) (num 0) (num 3) (num 4))) (num 4))
-   (check-equal? (eval-exp-c (ifleq (num 1) (num 0) (num 3) (num 4))) (num 4))
-   (check-equal? (eval-under-env (ifmunit (munit) (num 3) (bool #t)) null) (num 3))   
-   (check-equal? (eval-exp-c (ifmunit (munit) (num 3) (bool #t))) (num 3))
-   (check-equal? (eval-exp-c (ifmunit (num 4) (num 3) (num 6)) ) (num 6))
-    (check-equal? (eval-under-env(ifmunit (num 4) (num 3) (num 6)) null) (num 6))
-    (check-equal? (eval-exp (ifneq (num 3) (num 3) (num 4) (num 5))) (num 5))
-    (check-equal? (eval-exp-c (ifneq (num 3) (num 3) (num 4) (num 5))) (num 5))
-    (check-equal? (eval-under-env (with* (list (cons "a" (num 4))) (plus (var "a")(num 3))) null) (num 7))
-    (check-equal? (eval-exp-c (with* (list (cons "a" (num 4))) (plus (var "a")(num 3)))) (num 7))
-   ; (check-equal? (eval-exp (apply (apply numex-filter (lam "f" "g" (plus (var "g") (num 2))))
-    ;                               (apair (num 0) (apair (num -2) (munit))))) (apair (num 0) (munit)))
-     ;   (check-equal? (eval-exp-c (apply (apply numex-filter (lam "f" "g" (plus (var "g") (num 2))))
-      ;                             (apair (num 0) (apair (num -2) (munit))))) (apair (num 0) (munit)))
-   
-   
    ; arithmetic functions test
    (check-equal? (eval-exp (plus (num 2) (num 2))) (num 4) "test1")
    (check-equal? (eval-exp (minus (num -5) (num 2))) (num -7) "test2")
@@ -85,6 +19,7 @@
    (check-exn exn:fail?
               (lambda () (eval-exp (div (num 5) (num 0)))
               "test5"))
+
    (check-equal? (eval-exp (plus (num -5) (neg (minus (num -2) (num 3)))))
                            (num 0) "test6")
 
@@ -96,18 +31,21 @@
    (check-exn exn:fail?
               (lambda () (eval-exp (plus (num 5.2) (num 0.0)))
               "test8"))
+
+   
+
    ; logical functions test
    (check-equal? (eval-exp (andalso (bool #t) (bool #t))) (bool #t) "test9")
    (check-equal? (eval-exp (orelse (bool #t) (bool #f))) (bool #t) "test10")
    (check-equal? (eval-exp (orelse (bool #t) (num 2))) (bool #t) "test12")
    (check-equal? (eval-exp (andalso (bool #f) (div (num 2) (num 0)))) (bool #f) "test13")
-     (check-equal? (eval-exp (andalso (bool #t) (neg (bool #t)))) (bool #f) "test14")
+   (check-equal? (eval-exp (andalso (bool #t) (neg (bool #t)))) (bool #f) "test14")
    (check-equal? (eval-exp (orelse (iseq (num 2) (num 2)) (bool #f))) (bool #t) "test15")
    (check-equal? (eval-exp (neg (iseq (bool #t) (bool #f)))) (bool #t) "test16")
    (check-equal? (eval-exp (iseq (num 2) (bool #f))) (bool #f) "test17")
    (check-equal? (eval-exp (iseq (num 2) (num -2))) (bool #f) "test18") 
    (check-equal? (eval-exp (neg (ismunit (apair (num 3) (munit))))) (bool #t) "test19")
-   
+
    (check-exn exn:fail?
               (lambda () (eval-exp (plus (num 5) (bool #t)))
               "test20"))
@@ -138,6 +76,9 @@
    (check-exn exn:fail?
               (lambda () (eval-exp (2nd (num 3)))
               "test29"))
+
+
+
         
 (check-equal? (eval-exp (neg (num 0))) (num 0) "test30")
 (check-equal? (eval-exp (neg (neg (num -11)))) (num -11) "test31")
@@ -184,12 +125,12 @@
 
    
      
-   (check-equal? (numexlist->racketlist
-                 (eval-exp (apply (apply numex-all-gt (num 5))
-                                 (racketlist->numexlist 
-                                  (list (num 10) (num 4) (num 5) (num 15))))))
-                 (list (num 10) (num 15))
-                "test45")
+ ;  (check-equal? (numexlist->racketlist
+ ;                 (eval-exp (apply (apply numex-all-gt (num 5))
+  ;                                (racketlist->numexlist 
+   ;                                (list (num 10) (num 4) (num 5) (num 15))))))
+    ;             (list (num 10) (num 15))
+     ;            "test45")
 
    (test-equal? "test46"
     (list (num 3) (num 4) (bool #t))
@@ -209,8 +150,6 @@
          
    (check-equal? (racketlist->numexlist '(1 #t 3 #f))
                   (apair 1 (apair #t (apair 3 (apair #f (munit))))) "test49")
-
-;###############################
    (check-equal? (racketlist->numexlist '()) (munit) "test50")
    
    (check-equal? (numexlist->racketlist (apair #t (apair 2 (apair #f (apair 4 (munit))))))
@@ -287,7 +226,7 @@
    (check-equal? (eval-exp (apply (lam "a" "b" (ifleq (var "b") (num 5) (plus (var "b") (num 3))
                                                       (apply (var "a") (mult (num 2) (num 3)))))
                                   (num 2))) (num 5) "test70")
-     
+   
 (check-equal? (eval-exp (apply (lam "fact" "n" 
            (cnd (iseq (var "n") (num 0)) 
                    (num 1) 
@@ -367,9 +306,11 @@
    (check-equal? (eval-exp (with "x" (apair (num 1) (bool #t)) (1st (var "x")))) (num 1) "test101")
    (check-exn exn:fail? (lambda () (eval-exp (1st (plus (num 1) (num 2))))) "test102")
 
+
    (check-equal? (eval-exp (2nd (apair (num 1) (bool #t)))) (bool #t) "test103")
-  (check-equal? (eval-exp (with "x" (apair (num 1) (bool #t)) (2nd (var "x")))) (bool #t) "test104")
+   (check-equal? (eval-exp (with "x" (apair (num 1) (bool #t)) (2nd (var "x")))) (bool #t) "test104")
    (check-exn exn:fail? (lambda () (eval-exp (2nd (plus (num 1) (bool #t))))) "test105")
+
    (check-equal? (eval-exp (ismunit (munit))) (bool #t) "test106")
    (check-equal? (eval-exp (with "x" (munit) (ismunit (var "x")))) (bool #t) "test107")
    (check-equal? (eval-exp (ismunit (num 0))) (bool #f) "test108")
@@ -380,13 +321,12 @@
                                   (apply (var "double") (num 10))))
                  (num 20) "test110")
 
-;############
-     (check-equal?
+      (check-equal?
     (eval-exp
      (with "range"
            (lam "range" "lo"
-               (lam null "hi"
-                    (ifleq  (var "hi") (var "lo") (munit)
+                (lam null "hi"
+                     (ifleq  (var "hi") (var "lo") (munit)
                                 (apair (var "lo") (apply (apply (var "range") (plus (num 1) (var "lo"))) (var "hi"))))))
            (apply (apply (var "range") (num 5)) (num 8))))
     (apair (num 5) (apair (num 6) (apair (num 7)  (munit)))) "test111")
@@ -424,8 +364,7 @@
 
    (check-exn exn:fail? (lambda () (eval-exp (apply (num 1) (num 2)))) "test116")
 
-    (check-exn exn:fail? (lambda () (eval-exp (list (num 1) (num 2)))) "test117")
-
+      (check-exn exn:fail? (lambda () (eval-exp (list (num 1) (num 2)))) "test117")
 
 
 (check-equal? (eval-exp (with* (list (cons "x" (num 1)) (cons "y" (num 2))) (plus (var "x")(var "y"))))
@@ -434,26 +373,26 @@
                  (bool #t) "test119")
    (check-equal? (eval-exp (with* (list (cons "x" (num 1)) (cons "x" (num 2))) (var "x")))
                  (num 2) "test120")
+
 (check-equal? (eval-exp
-                 (apply (apply numex-filter (lam null "x" (plus (num 1) (var "x"))))
+                  (apply (apply numex-filter (lam null "x" (plus (num 1) (var "x"))))
                    (apair (num 1) (apair (num 2) (munit)))))
                  (apair (num 2) (apair (num 3) (munit))) "test121")
 
 (check-equal? (eval-exp
-                 (apply (apply numex-filter (lam null "x" (minus (num 1) (var "x"))))
-                  (apair (num 1) (apair (num 2) (munit)))))
-               (apair (num -1) (munit)) "test122")
+                  (apply (apply numex-filter (lam null "x" (minus (num 1) (var "x"))))
+                   (apair (num 1) (apair (num 2) (munit)))))
+                 (apair (num 1) (munit)) "test122")
 
-   (check-equal? (eval-exp
+(check-equal? (eval-exp
                   (apply (apply numex-filter (lam null "x" (mult (num 0) (var "x"))))
                    (apair (num 1) (apair (num 2) (munit)))))
-                (munit) "test123")
+                 (munit) "test123")
 
 (check-equal? (eval-exp
                   (apply (apply numex-filter (lam null "x" (num 0)))
-                  (apair (bool #t) (apair (num 2) (munit)))))
-                (munit) "test124")
-
+                   (apair (bool #t) (apair (num 2) (munit)))))
+                 (munit) "test124")
 (check-equal? (eval-exp
                   (apply (apply numex-filter (lam null "x" (minus (num 1) (var "x"))))
                     (munit)))
@@ -461,9 +400,9 @@
 
 
 (check-equal? (eval-exp
-                 (apply (apply numex-filter (lam null "x" (div (num 1) (var "x"))))
-                  (apair (num 2) (apair (num 1) (apair (num -2) (munit))))))
-                (apair (num 1) (munit)) "test126")
+                  (apply (apply numex-filter (lam null "x" (div (num 1) (var "x"))))
+                   (apair (num 2) (apair (num 1) (apair (num -2) (munit))))))
+                 (apair (num 1) (munit)) "test126")
 
 (check-equal? (eval-exp
                   (apply (apply numex-all-gt (num 1) )
@@ -475,7 +414,6 @@
                    (apair (num 2) (apair (neg (num 2)) (apair (num -2) (munit))))))
                  (munit) "test128")
 
-  
 (check-equal? (eval-exp
                   (apply (apply numex-all-gt (num -2) )
                    (munit)))
@@ -492,29 +430,23 @@
                   "test131")
 
    
-   
-)
-
-
-)
+   )
+  )
 
 
 (require rackunit/text-ui)
+(require rackunit/log)
 ;; runs the test
-(run-tests tests)
+;(run-tests tests)
 
 
+(define result (run-tests tests))
 
-  
+(define out (open-output-file "grade.txt" #:exists 'replace))
+(pretty-write (- 100 result) out #:newline? #t)
+(pretty-write (test-log) out #:newline? #f)
+(close-output-port out)
 
-     (check-exn (lambda (x) (string=? (exn-message x) "NUMEX addition applied to non-number"))
-             (lambda () (eval-exp (plus (num 2) (bool #t))))
-              "plus bad argument")
-
-  (check-equal? (numexlist->racketlist
-                 (eval-exp (apply (apply numex-all-gt (num 9))
-                                 (racketlist->numexlist 
-                                   (list (num 10) (num 9) (num 15))))))
-                (list (num 10) (num 15))
-                "provided combined test using problems 1, 2, and 4")
- 
+;(define out2 (open-output-file "summary.txt" #:exists 'replace))
+;(write (test-log) out2)
+;(close-output-port out2)

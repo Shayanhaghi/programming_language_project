@@ -357,6 +357,7 @@ result2
                                   )
                              (cond
                               [(not(string? function_bound_variable_string)) (error "function second argument should be a string")]
+                              [(equal? function_bound_variable_string function_identifier) (error "function variable1 and  variable2 can  not be a same name choose other different names ")]
                               [(null? function_bound_variable_string) (eval-under-env function_expression (env_append function_env function_bound_variable_string function_input))]
                               [(string? function_bound_variable_string) (eval-under-env function_expression (env_append (env_append function_env function_bound_variable_string function_input)
                                                                                     function_identifier (closure function_env function)))]
@@ -440,27 +441,464 @@ result2
   )
 )
 
+
+
 ;; Challenge Problem
 
 (struct fun-challenge (nameopt formal body freevars) #:transparent) ;; a recursive(?) 1-argument function
 
 
+
+
+
+
 ;; We will test this function directly, so it must do
 ;; as described in the assignment
-(define (compute-free-vars e) "CHANGE")
+(define (compute-free-vars e)
+  (car (compute-augmented-expression e)
+  )
+)
 
+(define (compute-augmented-expression e)
+  (cond
+    [(var? e)(cons e (set (var-string e))) ]
+
+    [(plus? e)
+     (let ([v1 (compute-augmented-expression (plus-e1 e))]
+           [v2 (compute-augmented-expression (plus-e2 e))])
+           (cons (plus (car v1) (car v2)) (set-union (cdr v1) (cdr v2)))) 
+     ]
+    [(num? e)
+     (cons e (set))
+     ]
+    [(bool? e)
+     (cons e (set))
+     ]
+    
+    [(minus? e)
+     (let ([v1 (compute-augmented-expression (minus-e1 e))]
+            [v2 (compute-augmented-expression (minus-e2 e))])
+           (cons (minus (car v1) (car v2)) (set-union (cdr v1) (cdr v2))))
+     
+     ]
+    [(mult? e)
+     (let ([v1 (compute-augmented-expression (mult-e1 e))]
+           [v2 (compute-augmented-expression (mult-e2 e))])
+           (cons (mult (car v1) (car v2)) (set-union (cdr v1) (cdr v2))))
+     ]
+    
+    [(div? e)
+     (let ([v1 (compute-augmented-expression (div-e1 e))]
+           [v2 (compute-augmented-expression (div-e2 e))])
+           (cons (div (car v1) (car v2)) (set-union (cdr v1) (cdr v2))))
+     ]
+    
+    [(neg? e)
+     (let ([v1 (compute-augmented-expression (neg-e1 e))])
+       (cons (neg (car v1)) (cdr v1))
+       )
+    ]
+    
+    [(andalso? e)
+     (let ([v1 (compute-augmented-expression (andalso-e1 e))]
+           [v2 (compute-augmented-expression (andalso-e2 e))])
+     
+           (cons (andalso (car v1) (car v2)) (set-union (cdr v1) (cdr v2)))
+       )
+     ]
+    
+    [(orelse? e)
+     (let ([v1 (compute-augmented-expression (orelse-e1 e))]
+           [v2 (compute-augmented-expression (orelse-e2 e))])
+           (cons (orelse (car v1) (car v2)) (set-union (cdr v1) (cdr v2)))
+       )
+     ]
+    [(cnd? e)
+      (let (   [v1 (compute-augmented-expression (cnd-condition e))]
+               [v2 (compute-augmented-expression (cnd-e2 e))]
+               [v3 (compute-augmented-expression (cnd-e3 e))])
+           (cons (cnd (car v1) (car v2) (car v3)) (set-union (cdr v1) (cdr v2) (cdr v3))))]
+     
+
+  
+    [(iseq? e)
+      (let ([v1 (compute-augmented-expression (iseq-e1 e))]
+           [v2 (compute-augmented-expression (iseq-e2 e))])
+           (cons (iseq (car v1) (car v2)) (set-union (cdr v1) (cdr v2)))
+       )
+     
+
+     ]
+    [(ifnzero? e)
+      (let ([v1 (compute-augmented-expression (ifnzero-e1 e))]
+               [v2 (compute-augmented-expression (ifnzero-e2 e))]
+               [v3 (compute-augmented-expression (ifnzero-e3 e))])
+           (cons (ifnzero (car v1) (car v2) (car v3)) (set-union (cdr v1) (cdr v2) (cdr v3))))]
+
+    [(ifleq? e)
+          (let ([v1 (compute-augmented-expression (ifleq-e1 e)) ]
+               [v2 (compute-augmented-expression  (ifleq-e2  e))]
+               [v3 (compute-augmented-expression  (ifleq-e3  e))]
+               [v4 (compute-augmented-expression  (ifleq-e4  e))])
+           (cons (ifleq (car v1) (car v2) (car v3) (car v4)) (set-union (cdr v1) (cdr v2) (cdr v3) (cdr v4))))]
+
+    [(apair? e)
+     (let ([v1 (compute-augmented-expression (apair-e1 e))]
+           [v2 (compute-augmented-expression (apair-e2 e))])
+           (cons (apair (car v1) (car v2)) (set-union (cdr v1) (cdr v2))))
+     
+     ]
+
+    [(1st? e)
+     (let ([v1 (compute-augmented-expression (1st-e1 e))])
+           (cons (1st (car v1)) (cdr v1)))
+     ]
+    
+    [(2nd? e)
+     (let ([v1 (compute-augmented-expression (2nd-e1 e))])
+           (cons (2nd (car v1)) (cdr v1)))     
+     ]
+    
+    [(munit? e)
+     (cons e (set))
+     ]
+    [(ismunit? e)
+       (let ([v1 (compute-augmented-expression (ismunit-e1 e))])
+           (cons (ismunit (car v1)) (cdr v1)))
+       ]
+
+    [(lam? e)
+       (let ([v1 (compute-augmented-expression (lam-e e))])
+            (let ([free_variables (set-remove (set-remove (cdr v1) (lam-s2 e)) (lam-s1 e))])
+               (cons (fun-challenge (lam-s1 e) (lam-s2 e) (car v1) free_variables) free_variables)))
+     
+     ]
+    [(with? e)
+            (let ([v1 (compute-augmented-expression (with-e1 e))]
+                  [v2 (compute-augmented-expression (with-e2 e))])
+            (cons (with (with-s e) (car v1) (car v2)) (set-union (set-remove (cdr v2) (with-s e)) (cdr v1))))
+     ]
+    [(apply? e)
+     (let (   [v1 (compute-augmented-expression (apply-e1 e))]
+              [v2 (compute-augmented-expression (apply-e2 e))])
+           (cons (apply (car v1) (car v2)) (set-union (cdr v2) (cdr v1)))) 
+     ]
+
+    [else (error "not a valid expression")]
+ )
+)
+
+
+
+
+
+
+; some function to accelerate definition in the next part
+(define (list_maker set)
+  (set->list set)
+ )
+
+(define (env_maker_set set env)
+(let ([list_of_free (list_maker set)])
+  (env_maker list_of_free env)
+  )
+)
+
+(define (env_maker list_of_free_var env)
+     
+    (cond [(null? list_of_free_var) null]
+          [(env_append (env_maker (cdr list_of_free_var) env) (car list_of_free_var) (envlookup env (car list_of_free_var))) ]
+          [else (error "internal error in env_maker")]
+          )
+      
+)
+
+(define (joint-env func-env env)
+  (cond [(null? func-env) env]
+        [else (env_append (joint-env (cdr func-env) env) (car(car func-env)) (cdr(car func-env)) )]
+    )
+
+ )
 
 ;; Do NOT share code with eval-under-env because that will make grading
 ;; more difficult, so copy most of your interpreter here and make minor changes
-(define (eval-under-env-c e env) "CHANGE")
+(define (eval-under-env-c e env)
+    (cond
+       
+         [(var? e) 
+         (envlookup env (var-string e))]
+     
+        [(plus? e) 
+         (let ([v1 (eval-under-env-c (plus-e1 e) env)]
+               [v2 (eval-under-env-c (plus-e2 e) env)])
+           (if (and (num? v1)
+                    (num? v2))
+               (num (+ (num-int v1) 
+                       (num-int v2)))
+               (error "NUMEX addition applied to non-number")))]
 
+        [(num? e)
+          (cond [(integer? (num-int e)) e]
+                [else (error "not a valid integer check syntax of int for more information :")]
+           )
+          ]
 
+         [(bool? e)
+          (cond [(boolean? (bool-boolean e)) e]
+                [else (error "not a valid boolean #t or #f are valid ones")]
+                )
+          ]
+         [(minus? e)
+          (let ([v1 (eval-under-env-c (minus-e1 e) env)]
+                [v2 (eval-under-env-c (minus-e2 e) env)])
+                (if (and (num? v1) (num? v2))
+                  (num (- (num-int v1) 
+                          (num-int v2)))
+                  (error "NUMEX subtraction applied to non-number")))
+          ]
+         [(mult? e)
+          (let ([v1 (eval-under-env-c (mult-e1 e) env)]
+                [v2 (eval-under-env-c (mult-e2 e) env)])
+                (if (and (num? v1) (num? v2))
+                  (num (* (num-int v1) 
+                          (num-int v2)))
+                  (error "NUMEX multiplication applied to non-number")))
+          ]
+         [(div? e)
+          (let ([v1 (eval-under-env-c (div-e1 e) env)]
+                [v2 (eval-under-env-c (div-e2 e) env)])
+                (if (and (num? v1) (num? v2))
+                    (cond[(equal? (num-int v2) 0) (error "division by zero in numex")]
+                         [else  (num (/ (num-int v1) 
+                         (num-int v2)))])
+                  (error "NUMEX division applied to non-number")))
+          ]
+         [(neg? e)
+          (let ([v1 (eval-under-env-c (neg-e1 e) env)])
+            (cond [(bool? v1)
+                   (cond [(equal? (bool-boolean v1) #t) (bool #f)]
+                         [(equal? (bool-boolean v1) #f) (bool #t)])
+                  ]
+                  [(num? v1)
+                   (num (-(num-int v1)))
+                  ]
+                  [else (error "negation applied on data other than bool or num")
+                   ]
+           )
+          )
+          ]
+         [(andalso? e)
+           (let ([v1 (eval-under-env-c (andalso-e1 e) env)]
+                [v2 (eval-under-env-c (andalso-e2 e) env)])
+                (cond [(and (bool? v1) (bool? v2))
+                       (cond [(equal? (bool-boolean v1) #f) (bool #f)]
+                             [else (cond
+                                     [(equal? (bool-boolean v2) #t) (bool #t)]
+                                     [else (bool #f)])])
+                       ]
+                      [else (error "andalso requires two boolean exactly.")]
+                      )
+             )
+           ]
 
+           [(orelse? e)
+             (let ([v1 (eval-under-env-c (orelse-e1 e) env)]
+                [v2 (eval-under-env-c (orelse-e2 e) env)])
+                (cond [(and (bool? v1) (bool? v2))
+                       (cond [(equal? (bool-boolean v1) #t) (bool #t)]
+                             [else (cond
+                                     [(equal? (bool-boolean v2) #t) (bool #t)]
+                                     [else (bool #f)])])
+                       ]
+                      [else (error "orelse requires two boolean exactly.")]
+                      )
+                
+             )
+            ]
+           [(cnd? e)
+            (let ([condition (eval-under-env-c (cnd-condition e) env)])
+              (cond [(bool? condition)
+                     (cond [(equal? (bool-boolean condition) #t)
+                            (eval-under-env-c (cnd-e2 e) env)]
+                           [else
+                            (eval-under-env-c (cnd-e3 e) env)]
 
+                           )]
+                    [else (error "In Cnd first element should be a boolean ")]
+                )
 
+             )
+            ]
+           [(iseq? e)
+            (let ([v1 (eval-under-env-c (iseq-e1 e) env)]
+                  [v2 (eval-under-env-c (iseq-e2 e) env)]
+                  )
+              (cond [(equal? (and (bool? v1) (bool? v2)) #t)
+                     (cond [(equal? (bool-boolean v1) (bool-boolean v2)) (bool #t)]
+                           [else (bool #f)])]
+                    [(equal? (and (num? v1)(num? v2)) #t)
+                     (cond [(equal? (num-int v1) (num-int v2)) (bool #t)]
+                           [else (bool #f)])]
+                    [else (error "both of the arguments for iseq should be either bool or num.")])
+              )
+            ]
+           [(ifnzero? e)
+            (let ([number (eval-under-env-c (ifnzero-e1 e) env)])
+              (cond
+               [(num? number)
+                (cond
+                  [(equal? (num-int number) 0) (eval-under-env-c (ifnzero-e3 e)  env)]
+                  [else (eval-under-env-c (ifnzero-e2 e)  env)]
+                  )
+                ]
+               [else (error "first expression in ifnzero should be a number")]
+               )       
+            )    
+            ]
+           [(ifleq? e)
+            (let ([e1 (eval-under-env-c  (ifleq-e1 e) env)]
+                  [e2 (eval-under-env-c (ifleq-e2 e) env)]
+                  )
+                  (cond [(and (num? e1) (num? e2))
+                         (cond
+                           [(> (num-int e1) (num-int e2)) (eval-under-env-c  (ifleq-e4 e) env)]
+                           [else (eval-under-env-c (ifleq-e3 e) env)]
+                           )
+                         ]
+                        [else (error "two first expression in ifleq should be number")]
+                    )
+                )
+            ]
+           [(apair? e)
+            (let ([v1 (eval-under-env-c (apair-e1 e) env)]
+                  [v2 (eval-under-env-c (apair-e2 e) env)])
+                 (apair v1 v2) 
+            )
+            ]
+             
+           [(1st? e)
+            (let ([v1 (eval-under-env-c (1st-e1 e) env)])
+              (cond [(apair? v1) (apair-e1 v1)]
+                    [else (error "1st arugument should be a apair")])
+           )
+            ]
+
+          [(2nd? e)
+            (let ([v1 (eval-under-env-c (2nd-e1 e) env)])
+              (cond [(apair? v1) (apair-e2 v1)]
+                    [else (error "2nd arugument should be a apair")])
+           )
+            ]
+           [(munit? e)
+              (munit)]
+         [(ismunit? e)
+          (let ([v1 (eval-under-env-c (ismunit-e1 e) env)])
+           (cond
+             [(munit? v1) (bool #t)]
+             [else (bool #f)]))]
+         ; since we ourself need to make clousre there is no need ! ?
+         ; or maybe it should be checked to avoid situation in which we can not be sure if we have function or not!
+         ; to check whether f is valid or not   
+         [(closure? e)
+           e]
+         ; function reduce to a closure.
+         [(fun-challenge? e)
+          (let ([functionName  (fun-challenge-nameopt e)]
+                [functionParameter (fun-challenge-formal e)]
+                [functionBody (fun-challenge-body e)]
+                [freevarSet     (fun-challenge-freevars e)])
+            (closure (env_maker_set freevarSet env) e)
+            )
+          
+        ]
+         ; 
+         [(with? e)
+          (let ([value1 (eval-under-env-c (with-e1 e) env)])
+             (eval-under-env-c (with-e2 e) (env_append env (with-s e) value1))
+            )
+          ]
+           
+         ; last 
+         [(apply? e)
+          (let ([function_closure (eval-under-env-c (apply-e1 e) env)])
+                (cond
+                  ;[(not(closure? function_closure)) (error "apply should be applied to a function")]
+                  [(not(closure? function_closure)) (write function_closure)]
+                  [else (let
+                       ([function (closure-f function_closure)]
+                        [function_env (closure-env function_closure)]
+                        [function_input (eval-under-env-c (apply-e2 e) env)]
+                       )
+                    (cond
+                      [ (not (fun-challenge? function)) (error "function doesn't reduced to fun-challenge that is the internal
+                                                                error for programms you! something seriously is wrong with it!")]
+                      [else (let ([function_identifier (fun-challenge-nameopt function)]
+                                  [function_bound_variable_string (fun-challenge-formal function)]
+                                  [function_expression (fun-challenge-body function)]
+                                  )
+                             (cond
+                              [(not(string? function_bound_variable_string)) (error "function second argument should be a string") ]
+                              [(equal? function_bound_variable_string function_identifier) (error "function variable1 and  variable2 can  not be a same name choose other different names ")]
+                              [(null? function_bound_variable_string)        (eval-under-env-c function_expression (env_append (joint-env function_env env) function_bound_variable_string function_input))]
+                              [(string? function_bound_variable_string)      (eval-under-env-c function_expression (env_append (env_append (joint-env function_env env) function_bound_variable_string function_input)
+                                                                                    function_identifier (closure function_env function)))]
+                              [else (error "something is wrong, probably function bound variable is not a string")]
+                              )
+                            )
+                         ]    
+                       )
+                     )
+                  ]
+                )
+              )       
+            ]
+         
+       ;; CHANGE add more cases here
+       [#t (error (format "bad NUMEX expression: ~v" e))]))
+  
 ;; Do NOT change this
 (define (eval-exp-c e)
   (eval-under-env-c (compute-free-vars e) null))
+
+;(eval-exp-c (lam "g" "u" (plus (var "u") (num 10))))
+;(compute-free-vars (with "x" (num 6) (apply (lam "g" "u" (plus (var "u") (num 10))) (var "x"))))
+
+(eval-exp-c (with   "x"   (num 6)   (apply (lam "g" "u" (plus (var "u") (num 10))) (var "x"))))
+
+(eval-exp   (with   "x"   (num 6)   (apply (lam "g" "u" (plus (var "u") (num 10))) (var "x"))))
+
+;(eval-exp-c (with   "x"   (num 6)   (apply (lam "u" "u" (plus (var "u") (num 10))) (var "x"))))
+(eval-exp (with   "x"   (num 6)   (apply (lam "x" "x" (plus (var "x") (num 10))) (var "x"))))
+
+
+
+;(define value (joint-env (list (cons "1" 4) (cons "3" 5)) (list (cons "23" 4) (cons "1" 5))) )
+
+;(envlookup value "1")
+
+;(env_maker_set (set "1" "23") (list (cons "23" 4) (cons "1" 5)))
+
+
+ 
+
+  
+  
+;(caddr(set->list(set 3 5 6)))
+
+
+
+
+
+; test case for compute-free-vars
+; some more test cases should  be written.
+;(compute-free-vars (with "a" (num 3) (apply (lam "function" "argument" (plus (var "argument") (var "a"))) (num 8))))
+
+
+
+
+
+
+
 
 
 
