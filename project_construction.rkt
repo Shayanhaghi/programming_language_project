@@ -368,7 +368,7 @@ result2
                     )
                    ]
                  )
-             )        
+             )       
           ]
          
 
@@ -381,19 +381,153 @@ result2
 ;; Do NOT change
 (define (eval-exp e)
   (eval-under-env e null))
+
+;; Problem 3
+
+(define (ifmunit e1 e2 e3) (cnd (ismunit e1) e2 e3))
+
+(define (with* bs e2)
+  (cond [(null? bs) e2]
+        [(not(string? (car(car bs)))) (error "list value error value in list of with we have element which is not of type string")] 
+        [(with (car(car bs)) (cdr(car bs)) (with* (cdr bs) e2))]
+  )
+)
+
+(define (ifneq e1 e2 e3 e4)
+  (cnd (iseq e1 e2) e4 e3)
+)
+
+;; Problem 4
+
+(define numex-filter-fake
   
+    (lam "filter" "f"
+                           (lam "map" "list"
+                                 (cnd (ismunit (var "list")) (munit)   
+                                  (with "value" (apply (var "f") (1st (var "list")))
+                                       (ifnzero (var "value") (apair (var "value") (apply (var "map") (2nd (var "list")))) (apply (var "map") (2nd (var "list")))
+                                        )
+                                       )
+                                  )
+                           )
+                                   
+    )
+  
+)
+(define numex-filter
+  
+    (lam "filter" "f"
+                           (lam "map" "list"
+                                 (cnd (ismunit (var "list")) (munit)   
+                                  (with "value" (apply (var "f") (1st (var "list")))
+                                       (ifnzero (var "value") (apair (1st (var "list")) (apply (var "map") (2nd (var "list")))) (apply (var "map") (2nd (var "list")))
+                                        )
+                                       )
+                                  )
+                           )
+                                   
+    )
+  
+)
 
-;;these teset is newer than coming ones
+
+(define numex-all-gt
+  (lam "all-gt" "value"
+            (with "f" (lam  ">ToZero" "number" (ifleq (var "number") (var "value") (num 0)(var "number")))  
+             (apply numex-filter (var "f") )  
+             
+             )
+  )
+)
+
+;; Challenge Problem
+
+(struct fun-challenge (nameopt formal body freevars) #:transparent) ;; a recursive(?) 1-argument function
 
 
-;test :
-(eval-under-env (with "s1" (num 2) (plus(var "s1")(num 7))) null)
+;; We will test this function directly, so it must do
+;; as described in the assignment
+(define (compute-free-vars e) "CHANGE")
 
-(eval-under-env (apply (lam "g" "k" (plus (var "k") (num 7))) (num 4)) null)
 
-(eval-under-env (apply (lam "g" "k" (plus (var "k") (num 7))) (num 4)) null)
+;; Do NOT share code with eval-under-env because that will make grading
+;; more difficult, so copy most of your interpreter here and make minor changes
+(define (eval-under-env-c e env) "CHANGE")
 
-(eval-under-env (apply (lam "g" "k" (ifnzero (var "k") (plus (var "k") (apply (var "g")(minus (var "k") (num 1) ))) (num 0))) (num 3)) null)
+
+
+
+
+;; Do NOT change this
+(define (eval-exp-c e)
+  (eval-under-env-c (compute-free-vars e) null))
+
+
+
+
+
+
+;test of numex-all-gt
+;(define listOfWonder (apair (num 3)(apair (num 4) (apair (num 5) (munit)))))
+;(eval-exp (apply (apply numex-all-gt (num 3)) listOfWonder ))
+
+;test of numex-filter
+;(define bloblo (lam "f" "g" (plus (var "g") (num 2))))
+;(eval-exp (apply bloblo (num 2)))
+;(eval-exp (apply (apply numex-filter bloblo) (munit) ))
+;(eval-exp (apply (apply numex-filter bloblo) (apair (num 0) (apair (num -2) (munit)))))
+
+
+
+
+
+
+
+
+;(eval-exp numex-filter bloblo ) 
+;(eval-exp ((numex-filter (lam "k" "g" (plus "g" (num 2)))) (munit)))
+
+;(define numex-all-gt
+;  (with "filter" numex-filter
+ ;       "CHANGE (notice filter is now in NUMEX scope)"))
+
+
+
+
+
+;(eval-under-env (with* (list (cons "a" (num 4))) (plus (var "a")(num 3))) null) -> (num 7)
+
+;(eval-under-env (with* (list (cons "a" (num 4)) (cons "b"  (plus (var "a") (num 5)))) (plus (plus (var "b")(num 3)) (var "a"))) null) -> (num 16)
+
+;(eval-exp (ifneq (num 3) (num 3) (num 4) (num 5))) -> (num 5)
+;(eval-exp (ifneq (num 3) (num 1) (num 4) (num 5))) -> (num 4)
+;(eval-exp (ifneq (bool #t) (bool #t) (num 4)(num 5))) -> (num 5)
+;(eval-exp (ifneq (bool #t) (bool #f)(num 4)(num 5))) -> (num 4)
+
+
+
+
+
+;; 
+
+
+
+
+;;test mimic stack to some point and the mimic a queue for previos tests
+
+
+
+;(eval-under-env (ifmunit (munit) (num 3) (bool #t)) null) -> (num 3)
+;(eval-under-env (ifmunit (num 4) (num 3) (num 6)) null) -> (num 6)
+;(eval-under-env (ifmunit (num 3)) null) -> ifmunit arity mismatch.
+;tests for with apply and lam
+;(eval-under-env (with "s1" (num 2) (plus(var "s1")(num 7))) null)
+
+;(eval-under-env (apply (lam "g" "k" (plus (var "k") (num 7))) (num 4)) null)
+
+;(eval-under-env (apply (lam "g" "k" (plus (var "k") (num 7))) (num 4)) null)
+
+;(eval-under-env (apply (lam "g" "k" (ifnzero (var "k") (plus (var "k") (apply (var "g")(minus (var "k") (num 1) ))) (num 0))) (num 3)) null)
 
 
 
