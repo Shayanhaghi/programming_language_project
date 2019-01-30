@@ -129,7 +129,8 @@
 ;; Complete this function
 ;; it is considered that we have list of (cons a b)
 (define (envlookup env str)
-  (cond [(null? env) (error "unbound variable" str "during evaluation in NUMEX Language")]
+  (cond
+    [(null? env) (error "unbound variable" str "during evaluation in NUMEX Language")]
           [(equal? (car(car env)) str) (cdr(car env))]
           [else (envlookup (cdr env) str)]
           )	
@@ -484,6 +485,29 @@
     )
   
 )
+
+(define numex-filter-input
+  
+    (lam "filter" "f"
+                           (lam "map" "list"
+                                 (cnd (ismunit (var "list")) (munit)   
+                                       (ifnzero(1st (var "list")) (apair (apply (var "f") (1st (var "list")))
+                                                                                            (apply (var "map") (2nd (var "list")))) (apply (var "map") (2nd (var "list")))
+                                        )
+                                       
+                                  )
+                           )
+                                   
+    )
+  )
+  
+
+  
+
+
+
+
+
 (define numex-filter-fake
   
     (lam "filter" "f"
@@ -499,7 +523,14 @@
     )
   
 )
-  
+
+
+(eval-exp (apply (apply numex-filter-input (lam "g" "x" (minus (num 1) (var "x"))))
+                  (apair (num 0) (apair (num 2) (munit)))))
+
+(eval-exp (apply (apply numex-filter-input (lam "g" "x" (div (num 1) (var "x"))))
+                  (apair (num 4) (apair (num 0) (munit)))))
+
 
 ;(eval-exp (apply (apply numex-filter (lam "g" "x" (minus (num 1) (var "x"))))
 ;                  (apair (num 1) (apair (num 2) (munit)))))
@@ -524,8 +555,8 @@
              )
   )
 )
-(define listOfWonder (apair (num 3)(apair (num 4) (apair (num 5) (munit)))))
-(eval-exp (apply (apply numex-all-gt (num 3)) listOfWonder ))
+;(define listOfWonder (apair (num 3)(apair (num 4) (apair (num 5) (munit)))))
+;(eval-exp (apply (apply numex-all-gt (num 3)) listOfWonder ))
 
 
 
@@ -832,7 +863,7 @@
 
              )
             ]
-           [(iseq? e)
+        [(iseq? e)
             (let ([v1 (eval-under-env-c (iseq-e1 e) env)]
                   [v2 (eval-under-env-c (iseq-e2 e) env)]
                   )
@@ -842,9 +873,17 @@
                     [(equal? (and (num? v1)(num? v2)) #t)
                      (cond [(equal? (num-int v1) (num-int v2)) (bool #t)]
                            [else (bool #f)])]
+                    [(equal? (and (bool? v1)(num? v2)) #t)
+                     (cond [(equal? (bool-boolean v1) (num-int v2)) (bool #t)]
+                           [else (bool #f)])]
+                    [(equal? (and (num? v1)(bool? v2)) #t)
+                     (cond [(equal? (num-int v1) (bool-boolean v2)) (bool #t)]
+                           [else (bool #f)])]
+                    
                     [else (error "both of the arguments for iseq should be either bool or num.")])
               )
             ]
+
            [(ifnzero? e)
             (let ([number (eval-under-env-c (ifnzero-e1 e) env)])
               (cond
@@ -1095,6 +1134,19 @@
 
 
 
+(define envList (list (cons "x" (num 2))
+					  (cons "y" (num 3))
+					  (cons "z" (num 4))
+					  (cons "p" (num 5))
+					  (cons "q" (num 6))
+					  (cons "t" (num 7))
+					  (cons "a" (num 8))
+					  (cons "b" (num 9))
+					  (cons "u" (num 10))
+					  (cons "s" (num 11))
+					  (cons "bt" (bool #t))
+					  (cons "bf" (bool #f))
+					  ))
 
 
 ; tests:
